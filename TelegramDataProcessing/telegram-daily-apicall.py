@@ -25,7 +25,7 @@ auth_key = os.environ['auth_key']
 
 def lambda_handler(event, context):
 
-    chat = "https://t.me/yemenSul" # Telegram chat to get messages from
+    chat = "https://t.me/CHATNAME" # Telegram chat to get messages from
     client = TelegramClient(StringSession(auth_key), api_id, api_hash)
     yesterday = datetime.today() - timedelta(days=1)
     messages = []
