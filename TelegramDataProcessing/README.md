@@ -2,7 +2,7 @@
 This project collects, processes, and consolidates daily messages from a Telegram channel.
 It is implemented using AWS Lambda and orchestrated through EventBridge.
 
-The pipeline consists of:
+The pipeline consists of the following steps:
   1. [telegram-daily-apicall.py](https://github.com/abjmorrison/codePortfolio/blob/main/TelegramDataProcessing/telegram-daily-apicall.py)
       - Makes an API call to the Telegram API to get updates
   2. [Telegram_ETL.py](https://github.com/abjmorrison/codePortfolio/blob/main/TelegramDataProcessing/telegram-ETL.py)
