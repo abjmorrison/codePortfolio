@@ -1,8 +1,7 @@
-#### Data For Impact, Mercy Corps ####
+########
 # Date: 2021-02-11
-# Contact: DataForImpact@mercycorps.org
-# Project: Yemen Economic Tracking Initiative
-# This script processes messages from Telegram and outputs a .csv to s3
+# This script processes messages from Telegram in Arabic
+# It is configured to run on AWS Lambda
 
 import boto3
 import numpy as np
@@ -17,8 +16,8 @@ import json
 
 # Location of inputs / outputs
 yesterday=datetime.today() - timedelta(days=1)
-out_bucket='aws-glue-yeti-inputs'
-out_key='yeti-economics/pre/exch/telegramYemenSul/yemenSul_telegram_'+str(yesterday.date())
+out_bucket='BucketName'
+out_key='outputKeyString'+str(yesterday.date())
 
 # Start client for AWS Services
 s3=boto3.client('s3')
@@ -61,17 +60,17 @@ def process_messages(in_bucket, in_key):
 
         #translate text to english
         df['english']=df.message.apply(translate_text)
-        #split english message into aden and sanaa information
-        df[['nocol','aden','sanaa']]=df.english.str.split('rial', expand=True)
+        #split english message into city1 and city2 information
+        df[['nocol','city1','city2']]=df.english.str.split('rial', expand=True)
         df.dropna(subset=['english'], inplace=True)
-        #split aden and sanaa into a list of strings containing buy/sell/currency/value for the date
-        for city in ['aden','sanaa']:
+        #split city1 and city2 into a list of strings containing buy/sell/currency/value for the date
+        for city in ['city1','city2']:
             df[city]=df[city].str.replace(' ','').str.split('\n', expand=False)
             df[city]=df[city].apply(drop_empty_str)
         #explode by column list
-        a=df.explode('aden')[['date','aden']]
-        s=df.explode('sanaa')[['date','sanaa']]
-        cities={'aden':a, 'sanaa':s}
+        a=df.explode('city1')[['date','city1']]
+        s=df.explode('city2')[['date','city2']]
+        cities={'city1':a, 'city2':s}
 
         #extract exchange rate information for each city and concat into final dataframe
         final=[]
@@ -79,7 +78,7 @@ def process_messages(in_bucket, in_key):
             ck=cities[city]
             ck['region']=city
             ck['currency'] = np.where(ck[city].str.contains(""), "usd",
-                           np.where(ck[city].str.contains("saudi"), "saudi", np.nan))
+                           np.where(ck[city].str.contains("currency2"), "currency2", np.nan))
             ck['buy_sell'] = np.where(ck[city].str.contains("buy"), "buy",
                            np.where(ck[city].str.contains("sell") | ck[city].str.contains("sale"), "sell", np.nan))
             ck['value'] = [re.findall('[\d\.\d]+', str(x)) for x in ck[city] ]
