@@ -61,7 +61,7 @@ def process_messages(in_bucket, in_key):
         #translate text to english
         df['english']=df.message.apply(translate_text)
         #split english message into city1 and city2 information
-        df[['nocol','city1','city2']]=df.english.str.split('rial', expand=True)
+        df[['nocol','city1','city2']]=df.english.str.split('currency', expand=True)
         df.dropna(subset=['english'], inplace=True)
         #split city1 and city2 into a list of strings containing buy/sell/currency/value for the date
         for city in ['city1','city2']:
