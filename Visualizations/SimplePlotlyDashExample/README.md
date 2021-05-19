@@ -1,0 +1,1 @@
+![PlotlyDashExample](./simpleplotlydashexample.png)
