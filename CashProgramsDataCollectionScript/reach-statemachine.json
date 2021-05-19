@@ -1,0 +1,85 @@
+{
+  "Comment": "This step functions runs the REACH JMMI ETL pipeline in Lambdas",
+  "StartAt": "Invoke Data Pull",
+  "States": {
+    "Invoke Data Pull": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:region:accountnumber:function:reach-datascrape:$LATEST"
+      },
+      "ResultPath": "$.pull_results",
+      "Next": "Crawler Choice"
+    },
+    "Crawler Choice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.pull_results.Payload.output",
+          "StringEquals": "True",
+          "Next": "Run Crawler"
+        },
+        {
+          "Variable": "$.pull_results.Payload.output",
+          "StringEquals": "False",
+          "Next": "Choice State End"
+        }
+      ],
+      "Default": "Choice State End"
+    },
+    "Choice State End": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:region:acountnumber:function:choicestate-end:$LATEST"
+      },
+      "End": true
+    },
+    "Run Crawler": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:region:accountnumberr:function:aws-gluecrawler-trigger:$LATEST",
+        "Payload": {
+          "crawlerName.$": "$.pull_results.Payload.crawlerName"
+        }
+      },
+      "ResultPath": "$.crawler_response",
+      "Next": "Crawler State Choice"
+    },
+    "Crawler State Choice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.crawler_response.Payload.status",
+          "StringEquals": "SUCCEEDED",
+          "Next": "Athena Query"
+        },
+        {
+          "Variable": "$.poll_results.Payload.status",
+          "StringEquals": "FAILED",
+          "Next": "Choice State Fail"
+        },
+        {
+          "Variable": "$.poll_results.Payload.status",
+          "StringEquals": "CANCELLED",
+          "Next": "Choice State Fail"
+        }
+      ],
+      "Default": "Athena Query"
+    },
+    "Choice State Fail": {
+      "Type": "Fail",
+      "Error": "Crawler Error",
+      "Cause": "Crawler failed."
+    },
+    "Athena Query": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:region:accountnumber:function:reach-athena-outputquery:$LATEST"
+      },
+      "End": true
+    }
+  }
+}
