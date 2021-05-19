@@ -12,7 +12,7 @@ The pipeline consists of:
   3. [aws-gluecrawler-monitor.py](https://github.com/abjmorrison/codePortfolio/blob/main/AWSScripts/aws-gluecrawler-monitor.py)
       - Accepts the name of a glue crawler and gets the status of the crawler run.
   4. [reach-athena-outputquery.py](https://github.com/abjmorrison/codePortfolio/blob/main/CashProgramsDataCollectionScript/reach-athena-outputquery.py)
-      - Queries the data catalog using Athena and outputs a .csv of the entire table
+      - Queries the data catalog using Athena and outputs a .csv of the entire table for use in OOB viz tools
   5. [reach-statemachine.json](https://github.com/abjmorrison/codePortfolio/blob/main/CashProgramsDataCollectionScript/reach-statemachine.json)
       - Pipeline StateMachine
 
